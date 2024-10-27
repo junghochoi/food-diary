@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+  "log"
+	"food-diary/internal/helpers"
 )
 
 func (h *Handlers) GetEntry(w http.ResponseWriter, r *http.Request) {
@@ -34,10 +36,12 @@ func (h *Handlers) CreateEntry(w http.ResponseWriter, req *http.Request) {
 		Description string   `json:"desc"`
 	}
 
-	err := json.NewDecoder(req.Body).Decode(&input)
+	err := helpers.ReadJson(w, req, &input)
 	if err != nil {
-
-		fmt.Errorf("CreateEntry error: %v", err)
+    log.Printf("CreateEntry error: %v", err)
+    fmt.Println(err)
 		return
 	}
+
+	fmt.Fprintf(w, "%+v\n", input)
 }
