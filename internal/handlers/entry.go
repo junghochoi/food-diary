@@ -38,10 +38,18 @@ func (h *Handlers) CreateEntry(w http.ResponseWriter, req *http.Request) {
 
 	err := helpers.ReadJson(w, req, &input)
 	if err != nil {
-    log.Printf("CreateEntry error: %v", err)
-    fmt.Println(err)
+    log.Printf("CreateEntry Input error: %v", err)
+
+    http.Error(w, fmt.Sprintf("Error reading input: %v", err), http.StatusBadRequest)
 		return
 	}
 
-	fmt.Fprintf(w, "%+v\n", input)
+
+  w.Header().Set("Content-Type", "application/json")
+  jsonResponse, err := json.Marshal(input)
+
+  if err != nil {
+    log.Printf("CreateEntry Output error: %v", error)
+    http.Errorw(w)
+  }
 }

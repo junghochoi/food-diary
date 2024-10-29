@@ -68,6 +68,3 @@ func WriteJson(w http.ResponseWriter, status int, data interface{}, headers http
 	return nil
 }
 
-func WriteError(w http.ResponseWriter, req *http.Request, err error) {
-	log.Println(err)
-}
