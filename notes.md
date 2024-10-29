@@ -10,12 +10,10 @@ if err == nil {
     return nil
 }
 
-
 ```
 
 
 ### Steps to Writing JSON
-
 
 ```go
 js, err := json.Marshal(data)

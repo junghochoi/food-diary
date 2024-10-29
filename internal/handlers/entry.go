@@ -1,10 +1,9 @@
 package handlers
 
 import (
-	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
-  "log"
 	"food-diary/internal/helpers"
 )
 
@@ -16,17 +15,10 @@ func (h *Handlers) GetEntry(w http.ResponseWriter, r *http.Request) {
 		"desc":     "very healthy apple",
 	}
 
-	js, err := json.Marshal(mockData)
+	err := helpers.WriteJson(w, http.StatusOK, mockData, http.Header{})
 	if err != nil {
-		fmt.Errorf("error: %v", err)
-		return
+		http.Error(w, "Failed to Write Json Response", http.StatusInternalServerError)
 	}
-
-	js = append(js, '\n')
-
-	w.Header().Set("Content-Type", "application/json")
-
-	w.Write(js)
 }
 
 func (h *Handlers) CreateEntry(w http.ResponseWriter, req *http.Request) {
@@ -38,18 +30,14 @@ func (h *Handlers) CreateEntry(w http.ResponseWriter, req *http.Request) {
 
 	err := helpers.ReadJson(w, req, &input)
 	if err != nil {
-    log.Printf("CreateEntry Input error: %v", err)
+		log.Printf("CreateEntry Input error: %v", err)
 
-    http.Error(w, fmt.Sprintf("Error reading input: %v", err), http.StatusBadRequest)
+		http.Error(w, fmt.Sprintf("Error reading input: %v", err), http.StatusBadRequest)
 		return
 	}
 
-
-  w.Header().Set("Content-Type", "application/json")
-  jsonResponse, err := json.Marshal(input)
-
-  if err != nil {
-    log.Printf("CreateEntry Output error: %v", error)
-    http.Errorw(w)
-  }
+	err = helpers.WriteJson(w, http.StatusOK, input, http.Header{})
+	if err != nil {
+		http.Error(w, "Failed to Write Json Response", http.StatusInternalServerError)
+	}
 }

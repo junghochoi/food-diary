@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 )
 
@@ -54,6 +53,11 @@ func ReadJson(w http.ResponseWriter, req *http.Request, res interface{}) error {
 func WriteJson(w http.ResponseWriter, status int, data interface{}, headers http.Header) error {
 	js, err := json.Marshal(data)
 	if err != nil {
+		http.Error(
+			w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError,
+		)
 		return err
 	}
 
@@ -63,8 +67,13 @@ func WriteJson(w http.ResponseWriter, status int, data interface{}, headers http
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	w.Write(js)
-
-	return nil
+	_, err = w.Write(js)
+	if err != nil {
+		http.Error(
+			w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError,
+		)
+	}
+	return err
 }
-
