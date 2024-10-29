@@ -8,6 +8,9 @@ import (
 	"net/http"
 )
 
+
+// type Envelope map[string]interface{}
+
 func ReadJson(w http.ResponseWriter, req *http.Request, res interface{}) error {
 	err := json.NewDecoder(req.Body).Decode(res)
 
@@ -76,4 +79,8 @@ func WriteJson(w http.ResponseWriter, status int, data interface{}, headers http
 		)
 	}
 	return err
+}
+
+func WriteError(w http.ResponseWriter, req *http.Request, status int, message interface{}) {
+
 }
