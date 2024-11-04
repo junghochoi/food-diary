@@ -12,27 +12,29 @@ import (
 	"github.com/joho/godotenv"
 
 	"food-diary/internal/config"
+	"food-diary/internal/db"
 	"food-diary/internal/routes"
-  "food-diary/internal/db"
 )
 
 const version = "1.0.0"
 
 func main() {
-
-  var err error
+	var err error
 	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
 
+	// Initialize Environment Variables
+	logger.Println("Initialize ENV variables")
 	err = godotenv.Load(".env")
-
 	if err != nil {
 		log.Fatalf("Error Loading .env file")
 	}
 
-  db.Connect()
+	// Initialize DB Connection
+	logger.Println("Initialize DB Connection")
+	db = db.Connect()
 
+	// Initialize App Configs
 	port, err := strconv.Atoi(os.Getenv("PORT"))
-
 	var conf config.Config
 
 	flag.IntVar(&conf.Port, "port", port, "API server port")
@@ -45,7 +47,7 @@ func main() {
 	conf.AppVersion = version
 	flag.Parse()
 
-
+	// Start the Server
 	var server *http.Server = &http.Server{
 		Addr:         fmt.Sprintf(":%d", conf.Port),
 		Handler:      routes.InitializeRoutes(&conf),
@@ -54,7 +56,7 @@ func main() {
 		WriteTimeout: 30 * time.Second,
 	}
 
-	logger.Printf("starting %s server on %s", conf.Environment, server.Addr)
+	logger.Printf("Start %s server on %s", conf.Environment, server.Addr)
 	err = server.ListenAndServe()
 	logger.Fatal(err)
 }
