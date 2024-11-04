@@ -31,7 +31,7 @@ func main() {
 
 	// Initialize DB Connection
 	logger.Println("Initialize DB Connection")
-	db = db.Connect()
+  db := db.Connect()
 
 	// Initialize App Configs
 	port, err := strconv.Atoi(os.Getenv("PORT"))
@@ -50,7 +50,7 @@ func main() {
 	// Start the Server
 	var server *http.Server = &http.Server{
 		Addr:         fmt.Sprintf(":%d", conf.Port),
-		Handler:      routes.InitializeRoutes(&conf),
+		Handler:      routes.InitializeRoutes(&conf, db),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,

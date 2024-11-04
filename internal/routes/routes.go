@@ -5,12 +5,14 @@ import (
 
 	"food-diary/internal/config"
 	"food-diary/internal/handlers"
+	"gorm.io/gorm"
+  
 )
 
-func InitializeRoutes(conf *config.Config) chi.Router {
+func InitializeRoutes(conf *config.Config, db *gorm.DB) chi.Router {
 	r := chi.NewRouter()
 
-	h := handlers.NewHandlers(conf)
+	h := handlers.NewHandlers(conf, db)
 
 	r.Get("/v1/healthcheck", h.Healthcheck)
 
