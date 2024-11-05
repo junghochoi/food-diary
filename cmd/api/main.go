@@ -9,10 +9,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/joho/godotenv"
-
 	"food-diary/internal/config"
-	"food-diary/internal/db"
+	"food-diary/internal/initializers"
 	"food-diary/internal/routes"
 )
 
@@ -22,16 +20,9 @@ func main() {
 	var err error
 	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
 
-	// Initialize Environment Variables
-	logger.Println("Initialize ENV variables")
-	err = godotenv.Load(".env")
-	if err != nil {
-		log.Fatalf("Error Loading .env file")
-	}
-
-	// Initialize DB Connection
-	logger.Println("Initialize DB Connection")
-  db := db.Connect()
+	// Initialize Environment Variables and Database Connection
+	initializers.LoadEnvVariables(logger)
+	db := initializers.ConnectToDB(logger)
 
 	// Initialize App Configs
 	port, err := strconv.Atoi(os.Getenv("PORT"))
