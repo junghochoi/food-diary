@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"food-diary/internal/helpers"
+	"food-diary/internal/models"
 )
 
 func (h *Handlers) GetEntry(w http.ResponseWriter, r *http.Request) {
@@ -24,22 +25,26 @@ func (h *Handlers) GetEntry(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handlers) CreateEntry(w http.ResponseWriter, req *http.Request) {
 	var input struct {
-		MealType    string   `json:"mealType"`
-		Foods       []string `json:"items"`
-		Description string   `json:"desc"`
+		Title             string   `json:"title"`
+		Foods             []string `json:"foods"`
+		FoodsDescription  string   `json:"foodDesc"`
+		Rating            uint8    `json:"rating"`
+		RatingDescription string   `json:"ratingDesc"`
 	}
 
 	var output struct {
-		Success bool `json:"success"`
-		Entry   struct {
-			MealType    string   `json:"mealType"`
-			Foods       []string `json:"items"`
-			Description string   `json:"desc"`
-    } `json:"entry"`
+		Success      bool   `json:"success"`
+		RowsAffected uint32 `json:"rowsAffected"`
+		Entry        struct {
+			Title             string   `json:"title"`
+			Foods             []string `json:"foods"`
+			FoodsDescription  string   `json:"foodDesc"`
+			Rating            uint8    `json:"rating"`
+			RatingDescription string   `json:"ratingDesc"`
+		} `json:"entry"`
 	}
 
 	err := helpers.ReadJson(w, req, &input)
-
 	if err != nil {
 		log.Printf("CreateEntry Input error: %v", err)
 
@@ -47,11 +52,30 @@ func (h *Handlers) CreateEntry(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	output.Success = true
-	output.Entry.MealType = input.MealType
-	output.Entry.Foods = input.Foods
-	output.Entry.Description = input.Description
+	entry := models.Entry{
+		Title:             input.Title,
+		Foods:             input.Foods,
+		FoodsDescription:  input.FoodsDescription,
+		Rating:            input.Rating,
+		RatingDescription: input.RatingDescription,
+	}
 
+	result := h.db.Create(&entry)
+
+	if result.Error != nil {
+		output.Success = false
+		output.RowsAffected = uint32(result.RowsAffected)
+		helpers.WriteJson(w, http.StatusInternalServerError, output, http.Header{})
+
+		return
+	}
+
+	output.Success = true
+	output.Entry.Title = input.Title
+	output.Entry.Foods = input.Foods
+	output.Entry.FoodsDescription = input.FoodsDescription
+	output.Entry.Rating = input.Rating
+	output.Entry.RatingDescription = input.RatingDescription
 
 	err = helpers.WriteJson(w, http.StatusOK, output, http.Header{})
 	if err != nil {
