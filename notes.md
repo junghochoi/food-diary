@@ -1,5 +1,12 @@
-### Steps to Reading JSON
+### TODO
 
+- CRUD for Entry
+- Authentication and JWT Token (social login, supabase) 
+
+
+
+
+### Steps to Reading JSON
 
 ```go
 
@@ -11,7 +18,6 @@ if err == nil {
 }
 
 ```
-
 
 ### Steps to Writing JSON
 
