@@ -15,4 +15,6 @@ func main() {
 	db := initializers.ConnectToDB(logger)
 
 	db.AutoMigrate(&models.Entry{})
+
+	// db.Migrator().AlterColumn(&models.Entry{}, "Foods")
 }
