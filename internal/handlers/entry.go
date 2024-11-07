@@ -28,10 +28,10 @@ func (h *Handlers) GetEntry(w http.ResponseWriter, r *http.Request) {
 func (h *Handlers) CreateEntry(w http.ResponseWriter, req *http.Request) {
 	var input struct {
 		Title             string   `json:"title"`
-		Foods             []string `json:"items"`
+		Foods             []string `json:"foods"`
 		FoodsDescription  string   `json:"foodDesc"`
 		Rating            uint8    `json:"rating"`
-		RatingDescription string   `json:"RatingDescription"`
+		RatingDescription string   `json:"ratingDesc"`
 	}
 
 	var output struct {
@@ -39,10 +39,10 @@ func (h *Handlers) CreateEntry(w http.ResponseWriter, req *http.Request) {
 		RowsAffected uint32 `json:"rowsAffected"`
 		Entry        struct {
 			Title             string   `json:"title"`
-			Foods             []string `json:"items"`
+			Foods             []string `json:"foods"`
 			FoodsDescription  string   `json:"foodDesc"`
 			Rating            uint8    `json:"rating"`
-			RatingDescription string   `json:"RatingDescription"`
+			RatingDescription string   `json:"ratingDesc"`
 		} `json:"entry"`
 	}
 
@@ -71,11 +71,11 @@ func (h *Handlers) CreateEntry(w http.ResponseWriter, req *http.Request) {
 	}
 
 	output.Success = true
-	// output.Entry.Title = input.Title
-	// output.Entry.Foods = input.Foods
-	// output.Entry.FoodsDescription = input.FoodsDescription
-	// output.Entry.Rating = input.Rating
-	// output.Entry.RatingDescription = input.RatingDescription
+	output.Entry.Title = input.Title
+	output.Entry.Foods = input.Foods
+	output.Entry.FoodsDescription = input.FoodsDescription
+	output.Entry.Rating = input.Rating
+	output.Entry.RatingDescription = input.RatingDescription
 	//
 	err = helpers.WriteJson(w, http.StatusOK, output, http.Header{})
 	if err != nil {
