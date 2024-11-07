@@ -67,14 +67,16 @@ func (h *Handlers) CreateEntry(w http.ResponseWriter, req *http.Request) {
 	if result.Error != nil {
 		output.Success = false
 		helpers.WriteJson(w, http.StatusInternalServerError, output, http.Header{})
+		return
 	}
-	output.Success = true
-	output.Entry.Title = input.Title
-	output.Entry.Foods = input.Foods
-	output.Entry.FoodsDescription = input.FoodsDescription
-	output.Entry.Rating = input.Rating
-	output.Entry.RatingDescription = input.RatingDescription
 
+	output.Success = true
+	// output.Entry.Title = input.Title
+	// output.Entry.Foods = input.Foods
+	// output.Entry.FoodsDescription = input.FoodsDescription
+	// output.Entry.Rating = input.Rating
+	// output.Entry.RatingDescription = input.RatingDescription
+	//
 	err = helpers.WriteJson(w, http.StatusOK, output, http.Header{})
 	if err != nil {
 		http.Error(w, "Failed to Write Json Response", http.StatusInternalServerError)
