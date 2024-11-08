@@ -5,10 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/lib/pq"
-
 	"food-diary/internal/helpers"
-	"food-diary/internal/models"
 )
 
 func (h *Handlers) GetEntry(w http.ResponseWriter, r *http.Request) {
@@ -54,21 +51,11 @@ func (h *Handlers) CreateEntry(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	entry := models.Entry{
-		Title:             input.Title,
-		Foods:             pq.StringArray(input.Foods),
-		FoodsDescription:  input.FoodsDescription,
-		Rating:            input.Rating,
-		RatingDescription: input.RatingDescription,
-	}
-
-	result := h.db.Create(&entry)
-
-	if result.Error != nil {
-		output.Success = false
-		helpers.WriteJson(w, http.StatusInternalServerError, output, http.Header{})
-		return
-	}
+	// if result.Error != nil {
+	// 	output.Success = false
+	// 	helpers.WriteJson(w, http.StatusInternalServerError, output, http.Header{})
+	// 	return
+	// }
 
 	output.Success = true
 	output.Entry.Title = input.Title

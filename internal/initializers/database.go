@@ -3,12 +3,13 @@ package initializers
 import (
 	"log"
 
-	"gorm.io/gorm"
+	"github.com/jackc/pgx/v5"
+
 	"food-diary/internal/db"
 )
 
-func ConnectToDB(logger *log.Logger) *gorm.DB{
+func ConnectToDB(logger *log.Logger) *pgx.Conn {
 	logger.Println("Initialize DB Connection")
 	db := db.Connect()
-  return db
+	return db
 }

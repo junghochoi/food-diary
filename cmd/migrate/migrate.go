@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"food-diary/internal/initializers"
-	"food-diary/internal/models"
 )
 
 func main() {
@@ -14,7 +13,5 @@ func main() {
 	initializers.LoadEnvVariables(logger)
 	db := initializers.ConnectToDB(logger)
 
-	db.AutoMigrate(&models.Entry{})
-
-	// db.Migrator().AlterColumn(&models.Entry{}, "Foods")
+	logger.Println(db)
 }
