@@ -8,9 +8,9 @@ import (
 
 type Handlers struct {
 	conf *config.Config
-	conn *pgxpool.Pool
+	pool *pgxpool.Pool
 }
 
 func NewHandlers(cfg *config.Config, conn *pgxpool.Pool) *Handlers {
-	return &Handlers{conf: cfg, conn: conn}
+	return &Handlers{conf: cfg, pool: conn}
 }

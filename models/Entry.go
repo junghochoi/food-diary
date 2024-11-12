@@ -1,6 +1,7 @@
 package models
 
 type Entry struct {
+	ID         string
 	Title      string
 	Foods      []string
 	FoodDesc   string

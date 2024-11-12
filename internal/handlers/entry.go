@@ -5,18 +5,59 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/jackc/pgx/v5"
+
 	"food-diary/internal/helpers"
+	"food-diary/models"
 )
 
-func (h *Handlers) GetEntry(w http.ResponseWriter, r *http.Request) {
-	mockData := map[string]string{
-		"id":       "entry1",
-		"mealType": "Breakfast",
-		"item":     "Apple",
-		"desc":     "very healthy apple",
+func (h *Handlers) GetEntry(w http.ResponseWriter, req *http.Request) {
+	var entry models.Entry
+	var input struct {
+		Id string `json:"id"`
 	}
 
-	err := helpers.WriteJson(w, http.StatusOK, mockData, http.Header{})
+	err := helpers.ReadJson(w, req, &input)
+
+	query := `
+    SELECT * 
+    FROM entries
+    WHERE ID = $1
+  `
+	err = h.pool.QueryRow(req.Context(), query, input.Id).Scan(
+		&entry.ID,
+		&entry.Title,
+		&entry.Foods,
+		&entry.FoodDesc, // pgx.NullString can handle NULL values
+		&entry.Rating,
+		&entry.RatingDesc,
+	)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			// No entry found for the provided ID
+			log.Printf("No entry found with ID %v", input.Id)
+
+			// Create and send a JSON response for no rows found
+			response := map[string]interface{}{
+				"success": false,
+				"message": "No entry found",
+			}
+			helpers.WriteJson(w, http.StatusNotFound, response, http.Header{})
+		} else {
+			// General database query error
+			log.Printf("Error scanning row: %v", err)
+
+			// Create and send a JSON response for the database error
+			response := map[string]interface{}{
+				"success": false,
+				"message": "Error retrieving entry",
+			}
+			helpers.WriteJson(w, http.StatusInternalServerError, response, http.Header{})
+		}
+		return
+	}
+
+	err = helpers.WriteJson(w, http.StatusOK, entry, http.Header{})
 	if err != nil {
 		http.Error(w, "Failed to Write Json Response", http.StatusInternalServerError)
 	}
@@ -58,7 +99,7 @@ func (h *Handlers) CreateEntry(w http.ResponseWriter, req *http.Request) {
   `
 
 	var entryID string
-	err = h.conn.QueryRow(req.Context(), query, input.Title, input.Foods, input.FoodsDescription, input.Rating, input.RatingDescription).
+	err = h.pool.QueryRow(req.Context(), query, input.Title, input.Foods, input.FoodsDescription, input.Rating, input.RatingDescription).
 		Scan(&entryID)
 	if err != nil {
 		log.Printf("Error inserting entry: %v", err)
