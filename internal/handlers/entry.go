@@ -51,11 +51,21 @@ func (h *Handlers) CreateEntry(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// if result.Error != nil {
-	// 	output.Success = false
-	// 	helpers.WriteJson(w, http.StatusInternalServerError, output, http.Header{})
-	// 	return
-	// }
+	query := `
+    INSERT INTO entries (title, foods, food_desc, rating, rating_desc)
+    VALUES ($1, $2, $3, $4, $5)
+    RETURNING id
+  `
+
+	var entryID string
+	err = h.conn.QueryRow(req.Context(), query, input.Title, input.Foods, input.FoodsDescription, input.Rating, input.RatingDescription).
+		Scan(&entryID)
+	if err != nil {
+		log.Printf("Error inserting entry: %v", err)
+		output.Success = false
+		helpers.WriteJson(w, http.StatusInternalServerError, output, http.Header{})
+		return
+	}
 
 	output.Success = true
 	output.Entry.Title = input.Title

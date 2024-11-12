@@ -9,7 +9,7 @@ import (
 )
 
 func Connect() *pgx.Conn {
-	dsn := os.Getenv("POSTGRES_URL")
+	dsn := os.Getenv("DATABASE_URL")
 
 	conn, err := pgx.Connect(context.Background(), dsn)
 	if err != nil {
