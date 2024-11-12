@@ -5,13 +5,13 @@ import (
 	"log"
 	"os"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func Connect() *pgx.Conn {
+func Connect() *pgxpool.Pool {
 	dsn := os.Getenv("DATABASE_URL")
 
-	conn, err := pgx.Connect(context.Background(), dsn)
+	conn, err := pgxpool.New(context.Background(), dsn)
 	if err != nil {
 		log.Fatalf("Failed to connect to Postgres Database")
 	}
