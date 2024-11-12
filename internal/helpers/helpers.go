@@ -8,8 +8,16 @@ import (
 	"net/http"
 )
 
-
-// type Envelope map[string]interface{}
+func RespondWithError(w http.ResponseWriter, statusCode int, message string, err error) {
+	response := map[string]interface{}{
+		"success": false,
+		"message": message,
+		"error":   err.Error(),
+	}
+	if err := WriteJson(w, statusCode, response, http.Header{}); err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	}
+}
 
 func ReadJson(w http.ResponseWriter, req *http.Request, res interface{}) error {
 	err := json.NewDecoder(req.Body).Decode(res)
@@ -79,8 +87,4 @@ func WriteJson(w http.ResponseWriter, status int, data interface{}, headers http
 		)
 	}
 	return err
-}
-
-func WriteError(w http.ResponseWriter, req *http.Request, status int, message interface{}) {
-
 }

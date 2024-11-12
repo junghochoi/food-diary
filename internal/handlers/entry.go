@@ -1,122 +1,91 @@
 package handlers
 
 import (
-	"fmt"
-	"log"
 	"net/http"
-
-	"github.com/jackc/pgx/v5"
 
 	"food-diary/internal/helpers"
 	"food-diary/models"
 )
 
 func (h *Handlers) GetEntry(w http.ResponseWriter, req *http.Request) {
-	var entry models.Entry
+	// Expected Input
 	var input struct {
 		Id string `json:"id"`
 	}
 
+	// Read req.Body JSON into input variable
 	err := helpers.ReadJson(w, req, &input)
-
-	query := `
-    SELECT * 
-    FROM entries
-    WHERE ID = $1
-  `
-	err = h.pool.QueryRow(req.Context(), query, input.Id).Scan(
-		&entry.ID,
-		&entry.Title,
-		&entry.Foods,
-		&entry.FoodDesc, // pgx.NullString can handle NULL values
-		&entry.Rating,
-		&entry.RatingDesc,
-	)
 	if err != nil {
-		if err == pgx.ErrNoRows {
-			// No entry found for the provided ID
-			log.Printf("No entry found with ID %v", input.Id)
-
-			// Create and send a JSON response for no rows found
-			response := map[string]interface{}{
-				"success": false,
-				"message": "No entry found",
-			}
-			helpers.WriteJson(w, http.StatusNotFound, response, http.Header{})
-		} else {
-			// General database query error
-			log.Printf("Error scanning row: %v", err)
-
-			// Create and send a JSON response for the database error
-			response := map[string]interface{}{
-				"success": false,
-				"message": "Error retrieving entry",
-			}
-			helpers.WriteJson(w, http.StatusInternalServerError, response, http.Header{})
-		}
+		helpers.RespondWithError(
+			w,
+			http.StatusBadRequest,
+			"Malformed JSON",
+			err,
+		)
 		return
 	}
 
+	// Fetch Entry Model of ID from database
+	entry, err := models.GetEntryByID(req.Context(), h.pool, input.Id)
+	if err != nil {
+		helpers.RespondWithError(
+			w,
+			http.StatusInternalServerError,
+			"Error Retrieving Entry",
+			err,
+		)
+		return
+
+	}
+
+	// Write Result to Response Body
 	err = helpers.WriteJson(w, http.StatusOK, entry, http.Header{})
 	if err != nil {
-		http.Error(w, "Failed to Write Json Response", http.StatusInternalServerError)
+		helpers.RespondWithError(
+			w,
+			http.StatusBadRequest,
+			"Error Writing JSON",
+			err,
+		)
+		return
 	}
 }
 
 func (h *Handlers) CreateEntry(w http.ResponseWriter, req *http.Request) {
-	var input struct {
-		Title             string   `json:"title"`
-		Foods             []string `json:"foods"`
-		FoodsDescription  string   `json:"foodDesc"`
-		Rating            uint8    `json:"rating"`
-		RatingDescription string   `json:"ratingDesc"`
-	}
-
+	// Expected JSON Input
+	var entry models.Entry
+	// JSON Output
 	var output struct {
-		Success      bool   `json:"success"`
-		RowsAffected uint32 `json:"rowsAffected"`
-		Entry        struct {
-			Title             string   `json:"title"`
-			Foods             []string `json:"foods"`
-			FoodsDescription  string   `json:"foodDesc"`
-			Rating            uint8    `json:"rating"`
-			RatingDescription string   `json:"ratingDesc"`
-		} `json:"entry"`
+		Success      bool         `json:"success"`
+		RowsAffected uint32       `json:"rowsAffected"`
+		Entry        models.Entry `json:"entry"`
 	}
 
-	err := helpers.ReadJson(w, req, &input)
+	// Read req.Body JSON
+	err := helpers.ReadJson(w, req, &entry)
 	if err != nil {
-		log.Printf("CreateEntry Input error: %v", err)
-
-		http.Error(w, fmt.Sprintf("Error reading input: %v", err), http.StatusBadRequest)
+		helpers.RespondWithError(w, http.StatusBadRequest, "Malformed JSON", err)
 		return
 	}
 
-	query := `
-    INSERT INTO entries (title, foods, food_desc, rating, rating_desc)
-    VALUES ($1, $2, $3, $4, $5)
-    RETURNING id
-  `
-
-	var entryID string
-	err = h.pool.QueryRow(req.Context(), query, input.Title, input.Foods, input.FoodsDescription, input.Rating, input.RatingDescription).
-		Scan(&entryID)
+	// Create Entry
+	err = models.CreateEntry(req.Context(), h.pool, &entry)
 	if err != nil {
-		log.Printf("Error inserting entry: %v", err)
-		output.Success = false
-		helpers.WriteJson(w, http.StatusInternalServerError, output, http.Header{})
+		helpers.RespondWithError(w, http.StatusInternalServerError, "Could not Create Entry", err)
 		return
 	}
 
 	output.Success = true
-	output.Entry.Title = input.Title
-	output.Entry.Foods = input.Foods
-	output.Entry.FoodsDescription = input.FoodsDescription
-	output.Entry.Rating = input.Rating
-	output.Entry.RatingDescription = input.RatingDescription
-	//
+	output.RowsAffected = 1
+	output.Entry = entry
+
 	err = helpers.WriteJson(w, http.StatusOK, output, http.Header{})
 	if err != nil {
-		http.Error(w, "Failed to Write Json Response", http.StatusInternalServerError)
+		helpers.RespondWithError(
+			w,
+			http.StatusInternalServerError,
+			"Entry created; Error writing JSON",
+			err,
+		)
 	}
 }
