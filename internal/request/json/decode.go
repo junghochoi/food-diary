@@ -1,4 +1,4 @@
-package helpers
+package json
 
 import (
 	"encoding/json"
@@ -8,18 +8,7 @@ import (
 	"net/http"
 )
 
-func RespondWithError(w http.ResponseWriter, statusCode int, message string, err error) {
-	response := map[string]interface{}{
-		"success": false,
-		"message": message,
-		"error":   err.Error(),
-	}
-	if err := WriteJson(w, statusCode, response, http.Header{}); err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-	}
-}
-
-func ReadJson(w http.ResponseWriter, req *http.Request, res interface{}) error {
+func DecodeRequestBody(w http.ResponseWriter, req *http.Request, res interface{}) error {
 	decoder := json.NewDecoder(req.Body)
 	decoder.DisallowUnknownFields()
 
@@ -62,30 +51,3 @@ func ReadJson(w http.ResponseWriter, req *http.Request, res interface{}) error {
 	}
 }
 
-func WriteJson(w http.ResponseWriter, status int, data interface{}, headers http.Header) error {
-	js, err := json.Marshal(data)
-	if err != nil {
-		http.Error(
-			w,
-			http.StatusText(http.StatusInternalServerError),
-			http.StatusInternalServerError,
-		)
-		return err
-	}
-
-	for key, value := range headers {
-		w.Header()[key] = value
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-	_, err = w.Write(js)
-	if err != nil {
-		http.Error(
-			w,
-			http.StatusText(http.StatusInternalServerError),
-			http.StatusInternalServerError,
-		)
-	}
-	return err
-}
