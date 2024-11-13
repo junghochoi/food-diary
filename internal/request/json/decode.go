@@ -10,7 +10,7 @@ import (
 
 func DecodeRequestBody(w http.ResponseWriter, req *http.Request, res interface{}) error {
 	decoder := json.NewDecoder(req.Body)
-	decoder.DisallowUnknownFields()
+	decoder.DisallowUnknownFields() // Any extra fields added to the req.Body are not allowed
 
 	err := decoder.Decode(res)
 

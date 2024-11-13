@@ -62,5 +62,6 @@ func (h *Handlers) CreateEntry(w http.ResponseWriter, req *http.Request) {
 	// Return a response
 	if err := response.Created(w, "Entry Successfully Created", &entry); err != nil {
 		response.Error(w, http.StatusInternalServerError, "Failed to write reponse", err)
+    return
 	}
 }
