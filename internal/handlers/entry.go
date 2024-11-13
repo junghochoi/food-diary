@@ -8,46 +8,27 @@ import (
 )
 
 func (h *Handlers) GetEntry(w http.ResponseWriter, req *http.Request) {
-	// Expected Input
+	// Define input struct for JSON
 	var input struct {
-		Id string `json:"id"`
+		ID string `json:"id"`
 	}
 
-	// Read req.Body JSON into input variable
-	err := helpers.ReadJson(w, req, &input)
-	if err != nil {
-		helpers.RespondWithError(
-			w,
-			http.StatusBadRequest,
-			"Malformed JSON",
-			err,
-		)
+	// Parse JSON input
+	if err := helpers.ReadJson(w, req, &input); err != nil {
+		helpers.RespondWithError(w, http.StatusBadRequest, "Malformed JSON", err)
 		return
 	}
 
-	// Fetch Entry Model of ID from database
-	entry, err := models.GetEntryByID(req.Context(), h.pool, input.Id)
+	// Fetch entry from database
+	entry, err := models.GetEntryByID(req.Context(), h.pool, input.ID)
 	if err != nil {
-		helpers.RespondWithError(
-			w,
-			http.StatusInternalServerError,
-			"Error Retrieving Entry",
-			err,
-		)
+		helpers.RespondWithError(w, http.StatusInternalServerError, "Error retrieving entry", err)
 		return
-
 	}
 
-	// Write Result to Response Body
-	err = helpers.WriteJson(w, http.StatusOK, entry, http.Header{})
-	if err != nil {
-		helpers.RespondWithError(
-			w,
-			http.StatusBadRequest,
-			"Error Writing JSON",
-			err,
-		)
-		return
+	// Respond with entry data
+	if err := helpers.WriteJson(w, http.StatusOK, entry, http.Header{}); err != nil {
+		helpers.RespondWithError(w, http.StatusInternalServerError, "Error writing JSON", err)
 	}
 }
 
