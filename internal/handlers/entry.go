@@ -3,10 +3,10 @@ package handlers
 import (
 	"net/http"
 
+	"food-diary/internal/models"
 	"food-diary/internal/request"
+	"food-diary/internal/request/json"
 	"food-diary/internal/response"
-  "food-diary/internal/request/json"
-	"food-diary/models"
 )
 
 func (h *Handlers) GetEntry(w http.ResponseWriter, req *http.Request) {
@@ -14,21 +14,21 @@ func (h *Handlers) GetEntry(w http.ResponseWriter, req *http.Request) {
 	var entryGetRequest request.EntryGetRequest
 	// Parse JSON input
 	if err := json.DecodeRequestBody(w, req, &entryGetRequest); err != nil {
-    response.Error(w,http.StatusBadRequest, "Malformed JSON", err)
+		response.Error(w, http.StatusBadRequest, "Malformed JSON", err)
 		return
 	}
 	// TODO Add Request Input Validation
 
 	// Fetch entry from database
-	entry, err := models.GetEntryByID(req.Context(), h.pool, entryGetRequest.ID)
+	entry, err := h.entryRepo.Get(entryGetRequest.ID)
 	if err != nil {
-    response.Error(w, http.StatusBadRequest, "Malformed JSON", err)
+		response.Error(w, http.StatusBadRequest, "Malformed JSON", err)
 		return
 	}
 
 	// Respond with entry data
 	if err := response.Success(w, "success", &entry); err != nil {
-    response.Error(w, http.StatusInternalServerError, "Error writing JSON", err )
+		response.Error(w, http.StatusInternalServerError, "Error writing JSON", err)
 	}
 }
 
@@ -54,7 +54,7 @@ func (h *Handlers) CreateEntry(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// Insert Entry to DB
-	if err := models.CreateEntry(req.Context(), h.pool, &entry); err != nil {
+	if err := h.entryRepo.Create(&entry); err != nil {
 		response.Error(w, http.StatusInternalServerError, "Could not Create Entry", err)
 		return
 	}
@@ -62,6 +62,6 @@ func (h *Handlers) CreateEntry(w http.ResponseWriter, req *http.Request) {
 	// Return a response
 	if err := response.Created(w, "Entry Successfully Created", &entry); err != nil {
 		response.Error(w, http.StatusInternalServerError, "Failed to write reponse", err)
-    return
+		return
 	}
 }
