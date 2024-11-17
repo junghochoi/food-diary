@@ -38,7 +38,7 @@ func (r *entryPGRepository) Create(entry *models.Entry) error {
 
 func (r *entryPGRepository) Get(id string) (*models.Entry, error) {
 	var entry models.Entry
-	err := r.db.QueryRow(context.Background(), "SELECT id, title, foods, description FROM entries WHERE id=$1", id).
-		Scan(&entry.ID, &entry.Title, &entry.Foods, &entry.FoodDesc)
+	err := r.db.QueryRow(context.Background(), "SELECT id, title, foods, food_desc, rating, rating_desc FROM entries WHERE id=$1", id).
+		Scan(&entry.ID, &entry.Title, &entry.Foods, &entry.FoodDesc, &entry.Rating, &entry.RatingDesc)
 	return &entry, err
 }

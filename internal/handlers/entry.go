@@ -14,7 +14,7 @@ func (h *Handlers) GetEntry(w http.ResponseWriter, req *http.Request) {
 	var entryGetRequest request.EntryGetRequest
 	// Parse JSON input
 	if err := json.DecodeRequestBody(w, req, &entryGetRequest); err != nil {
-		response.Error(w, http.StatusBadRequest, "Malformed JSON", err)
+		response.Error(w, http.StatusBadRequest, "Failed to decode request body", err)
 		return
 	}
 	// TODO Add Request Input Validation
@@ -22,7 +22,7 @@ func (h *Handlers) GetEntry(w http.ResponseWriter, req *http.Request) {
 	// Fetch entry from database
 	entry, err := h.entryRepo.Get(entryGetRequest.ID)
 	if err != nil {
-		response.Error(w, http.StatusBadRequest, "Malformed JSON", err)
+		response.Error(w, http.StatusBadRequest, "Failed to fetch from DB", err)
 		return
 	}
 
@@ -38,7 +38,7 @@ func (h *Handlers) CreateEntry(w http.ResponseWriter, req *http.Request) {
 
 	// Read req.Body JSON
 	if err := json.DecodeRequestBody(w, req, &entryCreateRequest); err != nil {
-		response.Error(w, http.StatusBadRequest, "Malformed JSON", err)
+		response.Error(w, http.StatusBadRequest, "Failed to decode request body", err)
 		return
 	}
 
