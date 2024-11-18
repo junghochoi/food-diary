@@ -20,7 +20,7 @@ func (h *Handlers) GetEntry(w http.ResponseWriter, req *http.Request) {
 	// TODO Add Request Input Validation
 
 	// Fetch entry from database
-	entry, err := h.entryRepo.Get(entryGetRequest.ID)
+	entry, err := h.entryService.GetEntryById(entryGetRequest.ID)
 	if err != nil {
 		response.Error(w, http.StatusBadRequest, "Failed to fetch from DB", err)
 		return
@@ -54,13 +54,14 @@ func (h *Handlers) CreateEntry(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// Insert Entry to DB
-	if err := h.entryRepo.Create(&entry); err != nil {
+	createdEntry, err := h.entryService.Create(&entry)
+	if err != nil {
 		response.Error(w, http.StatusInternalServerError, "Could not Create Entry", err)
 		return
 	}
 
 	// Return a response
-	if err := response.Created(w, "Entry Successfully Created", &entry); err != nil {
+	if err := response.Created(w, "Entry Successfully Created", &createdEntry); err != nil {
 		response.Error(w, http.StatusInternalServerError, "Failed to write reponse", err)
 		return
 	}

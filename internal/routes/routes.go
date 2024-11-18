@@ -7,14 +7,16 @@ import (
 	"food-diary/internal/config"
 	"food-diary/internal/handlers"
 	"food-diary/internal/repository/pgsql"
+	"food-diary/internal/services"
 )
 
 func InitializeRoutes(conf *config.Config, conn *pgxpool.Pool) chi.Router {
 	r := chi.NewRouter()
 
 	entryRepo := pgsql.NewEntryRepository(conn)
+	entryService := service.NewEntryService(entryRepo)
 
-	h := handlers.NewHandlers(conf, conn, entryRepo)
+	h := handlers.NewHandlers(conf, conn, entryService)
 
 	r.Get("/v1/healthcheck", h.Healthcheck)
 
