@@ -6,7 +6,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"food-diary/internal/models"
-	"food-diary/internal/repository/interfaces"
+	"food-diary/internal/repositories/interfaces"
 )
 
 type entryPGRepository struct {

@@ -2,7 +2,7 @@ package service
 
 import (
 	"food-diary/internal/models"
-	"food-diary/internal/repository/interfaces"
+	"food-diary/internal/repositories/interfaces"
 	"food-diary/internal/services/interfaces"
 )
 
