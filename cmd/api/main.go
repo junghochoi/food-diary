@@ -18,23 +18,26 @@ import (
 const version = "1.0.0"
 
 func main() {
-	var err error
+	// Create Logger
 	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
 
-	// Initialize Environment Variables and Database Connection
 	initializers.LoadEnvVariables(logger)
+	db := initializers.ConnectToDB(logger)
 
 	// Initialize Configuration
 	conf, err := config.LoadConfig()
 
-	// Initialize Database Connection
-	db := initializers.ConnectToDB(logger)
+	if err != nil {
+		log.Fatalf("Failed to properly load config: %s", err)
+	}
+
+	// Initialize Environment Variables and Database Connection
 
 	// DEPENDENCIES
 	entryRepo := pgsql.NewEntryRepository(db)
 	entryService := service.NewEntryService(entryRepo)
 	h := handlers.NewHandlers(conf, db, entryService)
-	r := routes.InitializeRoutes(h)
+	r := routes.InitializeRoutes(conf, h)
 
 	// Start the Server
 	var server *http.Server = &http.Server{

@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"flag"
 	"os"
 	"strconv"
@@ -11,6 +12,7 @@ type Config struct {
 	AppName     string
 	Port        int
 	AppVersion  string
+	JWTSecret   string
 }
 
 func LoadConfig() (*Config, error) {
@@ -19,10 +21,16 @@ func LoadConfig() (*Config, error) {
 		return nil, err
 	}
 
+	jwtSecret := os.Getenv("JWT_SECRET")
+	if jwtSecret == "" {
+		return nil, errors.New("JWT_SECRET was not properly loaded")
+	}
+
 	conf := &Config{
 		Port:        port,
 		Environment: getEnv("ENV", "development"),
 		AppVersion:  "1.0.0",
+		JWTSecret:   jwtSecret,
 	}
 
 	flag.IntVar(&conf.Port, "port", port, "API server port")
