@@ -46,7 +46,8 @@ func (h *Handlers) CreateEntry(w http.ResponseWriter, req *http.Request) {
 
 	// Create Entry Instance
 	entry := models.Entry{
-		Title:      entryCreateRequest.Title,
+		Title:      entryCreateRequest.Title, 
+    UserId:     "InvalidUserID",
 		Foods:      entryCreateRequest.Foods,
 		FoodDesc:   entryCreateRequest.FoodDesc,
 		Rating:     entryCreateRequest.Rating,

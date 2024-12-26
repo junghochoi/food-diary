@@ -21,7 +21,8 @@ func main() {
 	// Create Logger
 	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
 
-	initializers.LoadEnvVariables(logger)
+	environment := "local"
+	initializers.LoadEnvVariables(logger, environment)
 	db := initializers.ConnectToDB(logger)
 
 	// Initialize Configuration
